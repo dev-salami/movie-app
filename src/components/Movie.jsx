@@ -45,7 +45,6 @@ const Movie = ({ item }) => {
             <FaRegHeart className='absolute top-4 left-4 text-gray-300' />
           )}
         </p> */}
-        <FaHeart className="absolute top-4 left-4 text-gray-300" />
       </div>
     </div>
   );
