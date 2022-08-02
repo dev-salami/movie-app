@@ -1,36 +1,51 @@
 import { useEffect, useState } from "react";
+import { Audio } from "react-loader-spinner";
+
 import Items from "./items";
 import axios from "axios";
 function Search() {
   const [movie, setMovie] = useState([]);
-  const [input, setInput] = useState([]);
+  const [input, setInput] = useState("");
   const [Found, setFound] = useState(false);
+  const [Loading, setLoading] = useState(false);
+  const [Error, setError] = useState("");
 
   const handleInput = (event) => {
     setInput(event.target.value);
+    // console.log(event.target.value.trim().length);
   };
   const key = "827ad42638bcc8905f7c22f6277a22fb";
   let url = `https://api.themoviedb.org/3/search/movie?api_key=${key}&language=en-US&query=${input}&page=1&include_adult=false`;
 
   const searchMovie = () => {
+    setLoading(true);
+
     axios
       .get(url)
       .then((response) => {
         setMovie(response.data.results);
+        setLoading(false);
+        setError("");
+        console.log(response.data.results);
+        setFound(false);
+        if (response.data.results.length === 0) {
+          setFound(true);
+        }
       })
       .catch((e) => {
-        console.log(e.response);
+        console.log(e);
+        setLoading(false);
+        setError("NETWORK ERROR");
+        setFound(false);
       });
-    setFound(true);
-    console.log(movie);
-    console.log(input);
-    console.log(movie.length);
-    //     if (movie.length > 0) {
-    //       setFound(true);
-    //     }
-    //     if (movie.length === 0) {
-    //       setFound(false);
-    //     }
+  };
+  const validateForm = () => {
+    setMovie([]);
+    if (input.trim().length === 0) {
+      alert("Type in a movie Name");
+
+      return false;
+    } else searchMovie();
   };
 
   return (
@@ -50,7 +65,7 @@ function Search() {
               className="btn inline-block px-6 py-2.5 bg-blue-600 text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700  focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-800 active:shadow-lg transition duration-150 ease-in-out  items-center"
               type="button"
               id="button-addon2"
-              onClick={searchMovie}
+              onClick={validateForm}
             >
               <svg
                 aria-hidden="true"
@@ -71,21 +86,33 @@ function Search() {
           </div>
         </div>
       </div>
-      {Found && (
+      {!Loading && <p className="text-6xl text-red-600 p-20">{Error}</p>}
+      {Loading && (
+        <Audio
+          height="80"
+          width="80"
+          radius="9"
+          color="#000000"
+          ariaLabel="three-dots-loading"
+          wrapperStyle
+          wrapperClass
+        />
+      )}
+      {!Loading && (
         <div>
-          {movie.length ? null : (
-            <h3 className="text-red-800 text-3xl">
-              The Movie Searched for isn't found
-            </h3>
+          {Found && (
+            <p className="text-6xl text-red-600 p-20">{"MOVIE NOT FOUND "}</p>
           )}
         </div>
       )}
 
-      <div className="lg:grid-cols-3 grid md:grid-cols-2 sm:grid-cols-1 pt-2  gap-4 ">
-        {movie.map((item, id) => (
-          <Items key={id} item={item} />
-        ))}
-      </div>
+      {!Loading && (
+        <div className="lg:grid-cols-3 grid md:grid-cols-2 sm:grid-cols-1 pt-2  gap-4 ">
+          {movie.map((item, id) => (
+            <Items key={id} item={item} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
